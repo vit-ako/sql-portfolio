@@ -1,0 +1,77 @@
+name: SQL CI - проверка запросов в PostgreSQL
+
+on:
+  pull_request:
+    branches:           
+      - main
+      - develop
+
+jobs:
+  test-postgresql:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:18
+        
+        env:
+          POSTGRES_USER: testuser          
+          POSTGRES_PASSWORD: testpass       
+          POSTGRES_DB: testdb              
+        
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Клонирование репозитория
+        uses: actions/checkout@v4
+
+
+      - name: Установка PostgreSQL клиента
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+
+      - name: Ожидание готовности PostgreSQL
+        run: |
+          for i in {1..15}; do
+            pg_isready -h localhost -p 5432 -U testuser -d testdb && break || sleep 2
+          done
+      
+      # Выполняем все SQL-файлы по порядку из папки src/sql
+      - name: Выполнение SQL файлов
+        run: |
+          CONN="postgresql://testuser:testpass@localhost:5432/testdb"
+          
+          if [ ! -d "src/sql" ]; then
+            echo "❌ Папка src/sql не найдена!"
+            echo "Текущие файлы и папки:"
+            ls -la
+            exit 1
+          fi
+          
+          echo "📁 Найдена папка src/sql. Содержимое:"
+          ls -la src/sql/
+
+          cd src/sql  # Переходим в папку с SQL файлами
+          
+          for sqlfile in $(ls -1 *.sql 2>/dev/null | sort); do
+            echo "=== Выполняется файл: src/sql/$sqlfile ==="
+            
+            if ! psql "$CONN" -v ON_ERROR_STOP=1 -f "$sqlfile" 2>&1; then
+              echo "❌ Ошибка в файле src/sql/$sqlfile!"
+              exit 1  # Выходим с кодом ошибки, CI станет красным
+            fi
+            
+            echo "✅ Файл src/sql/$sqlfile выполнен успешно"
+            echo "---"
+          done
+          
+          echo "🎉 Все SQL файлы выполнены без ошибок!"
