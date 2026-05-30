@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS retail_sales (
 );
 
 -- загружаем данные из CSV
-COPY retail_sales
+\COPY retail_sales
 FROM 'retailhive_10k.csv'
 DELIMITER ','
 CSV HEADER;
