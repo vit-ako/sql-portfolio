@@ -12,9 +12,3 @@ CREATE TABLE retail_sales (
     price DECIMAL(10,2),
     revenue DECIMAL(10,2)
 );
-
--- загружаем данные из CSV
-COPY retail_sales
-FROM 'retailhive_10k.csv'
-DELIMITER ','
-CSV HEADER;
