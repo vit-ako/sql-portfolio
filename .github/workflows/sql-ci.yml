@@ -45,7 +45,6 @@ jobs:
             pg_isready -h localhost -p 5432 -U testuser -d testdb && break || sleep 2
           done
       
-      # Выполняем все SQL-файлы по порядку из папки src/sql
       - name: Выполнение SQL файлов
         run: |
           CONN="postgresql://testuser:testpass@localhost:5432/testdb"
@@ -59,19 +58,32 @@ jobs:
           
           echo "Найдена папка src/sql. Содержимое:"
           ls -la src/sql/
-
-          cd src/sql  # Переходим в папку с SQL файлами
+          
+          cd src/sql
           
           for sqlfile in $(ls -1 *.sql 2>/dev/null | sort); do
+            echo ""
+            echo "═══════════════════════════════════════════════════════"
             echo "=== Выполняется файл: src/sql/$sqlfile ==="
+            echo "═══════════════════════════════════════════════════════"
+            
+            echo "Содержимое файла $sqlfile:"
+            echo "----------------------------------------"
+            cat "$sqlfile"
+            echo "----------------------------------------"
+            echo ""
             
             if ! psql "$CONN" -v ON_ERROR_STOP=1 -f "$sqlfile" 2>&1; then
-              echo "Ошибка в файле src/sql/$sqlfile!"
-              exit 1  # Выходим с кодом ошибки, CI станет красным
+              echo ""
+              echo "ОШИБКА в файле src/sql/$sqlfile!"
+              echo "Пожалуйста, проверьте синтаксис SQL выше"
+              exit 1 
             fi
             
             echo "Файл src/sql/$sqlfile выполнен успешно"
-            echo "---"
           done
           
+          echo ""
+          echo "═══════════════════════════════════════════════════════"
           echo "Все SQL файлы выполнены без ошибок!"
+          echo "═══════════════════════════════════════════════════════"
