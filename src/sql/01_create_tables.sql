@@ -1,6 +1,5 @@
 -- создаём таблицу
-DROP TABLE retail_sales;
-CREATE TABLE retail_sales (
+CREATE TABLE IF NOT EXISTS retail_sales (
     product_title TEXT,
     rating VARCHAR(20),
     transaction_id VARCHAR(50) PRIMARY KEY,
