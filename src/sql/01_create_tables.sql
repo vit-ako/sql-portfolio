@@ -1,4 +1,3 @@
--- создаём таблицу
 CREATE TABLE IF NOT EXISTS retail_sales (
     product_title TEXT,
     rating VARCHAR(20),
@@ -11,4 +10,3 @@ CREATE TABLE IF NOT EXISTS retail_sales (
     price DECIMAL(10,2),
     revenue DECIMAL(10,2)
 );
-
