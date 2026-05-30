@@ -12,8 +12,3 @@ CREATE TABLE IF NOT EXISTS retail_sales (
     revenue DECIMAL(10,2)
 );
 
--- загружаем данные из CSV
-\COPY retail_sales
-FROM 'data/retailhive_10k.csv'
-DELIMITER ','
-CSV HEADER;
